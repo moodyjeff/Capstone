@@ -1,0 +1,152 @@
+
+
+<DOCTYPE html>
+<html>
+<head>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<style>
+body, html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Include background image class */
+.plant-image {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("plants.jpg");
+  height: 50%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+}
+
+/* formatting of text  */
+.plant-text {
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+}
+
+/* class for button */
+.plant-text button {
+  border: none;
+  outline: 0;
+  display: inline-block;
+  padding: 10px 25px;
+  color: black;
+  background-color: #ddd;
+  text-align: center;
+  cursor: pointer;
+}
+/* class for button hover  */
+.plant-text button:hover {
+  background-color: #555;
+  color: white;
+}
+
+section {
+  display: -webkit-flex;
+  display: flex;
+}
+
+/* Style the navigation menu */
+nav {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  background: #f1f1f1;
+  padding: 20px;
+}
+
+/* Style the list inside the menu */
+nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+/* Style the content */
+article {
+  -webkit-flex: 3;
+  -ms-flex: 3;
+  flex: 3;
+  background-color: #f1f1f1;
+  padding: 10px;
+}
+</style>
+</head>
+<body>
+
+<div class="plant-image">
+  <div class="plant-text">
+    <h1>So you have a flower?</h1>
+    <p>Let's find out what type it is</p>
+    <input id='image-selector' type='file' />
+    <p></p>
+    <button id='predict-button' >TELL ME</button>
+  </div>
+</div>
+
+<section>
+  <nav>
+    <img id='selected-image' src='' width="300" />
+  </nav>
+
+  <article>
+    <h1><span id='max-prediction'></span></h1>
+    <p><span id='daisy-name'></span><span id='daisy-prediction'></span></p>
+    <p><span id='dandelion-name'></span><span id='dandelion-prediction'></span></p>
+    <p><span id='rose-name'></span><span id='rose-prediction'></span></p>
+    <p><span id='sunflower-name'></span><span id='sunflower-prediction'></span></p>
+    <p><span id='tulip-name'></span><span id='tulip-prediction'></span></p>
+    <p> </p>
+</section>
+
+<script src='https://code.jquery.com/jquery-3.3.1.min.js'></script>
+<script>
+/* create javascript elements related to image capture  */
+  let base64Image;
+  $("#image-selector").change(function(){
+    let reader = new FileReader();
+    reader.onload = function(e) {
+      let dataURL = reader.result;
+      $('#selected-image').attr('src',dataURL);
+      base64Image = dataURL.replace('data:image/jpeg;base64,','');
+      console.log(base64Image);
+      }
+    reader.readAsDataURL($('#image-selector')[0].files[0]);
+    $('#max-prediction').text('');
+    $('#daisy-prediction').text('');
+    $('#dandelion-prediction').text('');
+    $('#rose-prediction').text('');
+    $('#sunflower-prediction').text('');
+    $('#tulip-prediction').text('');
+  });
+
+  $('#predict-button').click(function(event){
+    let message = {
+      image: base64Image
+    }
+    console.log(message);
+    $.post('http://0.0.0.0:5000/predict2', JSON.stringify(message), function(response){
+      /* create id tags for reponses  */
+      $('#max-prediction').text(response.prediction.max);
+      $('#daisy-prediction').text(response.prediction.daisy.toFixed(6));
+      $('#dandelion-prediction').text(response.prediction.dandelion.toFixed(6));
+      $('#rose-prediction').text(response.prediction.rose.toFixed(6));
+      $('#sunflower-prediction').text(response.prediction.sunflower.toFixed(6));
+      $('#tulip-prediction').text(response.prediction.tulip.toFixed(6));
+      $('#daisy-name').text(response.name.daisy);
+      $('#dandelion-name').text(response.name.dandelion);
+      $('#rose-name').text(response.name.rose);
+      $('#sunflower-name').text(response.name.sunflower);
+      $('#tulip-name').text(response.name.tulip);
+      console.log(response);
+    });
+  });
+</script>
+</body>
+</html>
